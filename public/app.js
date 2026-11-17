@@ -1,6 +1,51 @@
-// public/app.js - NewsPulse Trail Client Application
+// public/app.js - NewsPulse Trail Client Application (Editorial Redesign)
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Theme Toggle Management (Light / Dark)
+  const themeToggle = document.getElementById('theme-toggle');
+  const themeIcon = document.getElementById('theme-icon');
+
+  function getPreferredTheme() {
+    const saved = localStorage.getItem('np_theme');
+    if (saved) return saved;
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('np_theme', theme);
+    if (themeIcon) {
+      if (theme === 'dark') {
+        themeIcon.innerHTML = `
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        `;
+      } else {
+        themeIcon.innerHTML = `
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        `;
+      }
+    }
+  }
+
+  const initialTheme = getPreferredTheme();
+  applyTheme(initialTheme);
+
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+    });
+  }
+
   // DOM Elements - Tab 1
   const headlineInput = document.getElementById('headline-input');
   const btnAnalyze = document.getElementById('btn-analyze');
@@ -8,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const resultsView = document.getElementById('results-view');
   const cardHeadlineText = document.getElementById('card-headline-text');
   const cardBadge = document.getElementById('card-badge');
+  const cardBadgeDot = document.getElementById('card-badge-dot');
   const cardBadgeText = document.getElementById('card-badge-text');
   const cardScoreNum = document.getElementById('card-score-num');
   
@@ -22,7 +68,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const diagPolarity = document.getElementById('diag-polarity');
   const diagTone = document.getElementById('diag-tone');
   const diagSubj = document.getElementById('diag-subj');
+  const diagConfidenceLabel = document.getElementById('diag-confidence-label');
+  const divergingBarFill = document.getElementById('diverging-bar-fill');
   const entitiesContainer = document.getElementById('entities-container');
+  const btnCopyResult = document.getElementById('btn-copy-result');
+  const copyBtnText = document.getElementById('copy-btn-text');
 
   const trailNodesWrap = document.getElementById('trail-nodes-wrap');
   const btnModeRipple = document.getElementById('btn-mode-ripple');
@@ -38,6 +88,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const liveSumPos = document.getElementById('live-sum-pos');
   const liveSumNeu = document.getElementById('live-sum-neu');
   const liveSumNeg = document.getElementById('live-sum-neg');
+  const livePropPos = document.getElementById('live-prop-pos');
+  const livePropNeu = document.getElementById('live-prop-neu');
+  const livePropNeg = document.getElementById('live-prop-neg');
 
   // DOM Elements - Tab 3 (Batch)
   const batchTextarea = document.getElementById('batch-textarea');
@@ -90,10 +143,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   tabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      tabBtns.forEach(b => b.classList.remove('active'));
+      tabBtns.forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
       tabContents.forEach(c => c.style.display = 'none');
 
       btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
       const targetId = btn.getAttribute('data-tab');
       const targetContent = document.getElementById(targetId);
       if (targetContent) {
@@ -119,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Keyboard shortcut: Enter or Cmd/Ctrl+Enter on headline input
   headlineInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       const text = headlineInput.value.trim();
@@ -126,9 +184,38 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Keyboard shortcut: Cmd/Ctrl+Enter on batch textarea
+  if (batchTextarea) {
+    batchTextarea.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        btnRunBatch.click();
+      }
+    });
+  }
+
+  // Copy Analysis Summary to Clipboard
+  if (btnCopyResult) {
+    btnCopyResult.addEventListener('click', () => {
+      if (!currentAnalysisData) return;
+      const s = currentAnalysisData.sentiment;
+      const summaryText = `[NewsPulse] Headline: "${currentAnalysisData.headline}"\nSentiment: ${s.label} (${(s.score * 100).toFixed(1)}%)\nPolarity: ${(s.polarity >= 0 ? '+' : '') + s.polarity.toFixed(2)} | Market Momentum: ${s.market_impact}\nTone: ${s.tone}`;
+
+      navigator.clipboard.writeText(summaryText).then(() => {
+        if (copyBtnText) copyBtnText.textContent = 'Copied to Clipboard!';
+        setTimeout(() => {
+          if (copyBtnText) copyBtnText.textContent = 'Copy Summary';
+        }, 2200);
+      }).catch(err => {
+        console.warn('Clipboard write failed:', err);
+      });
+    });
+  }
+
   async function runAnalysis(headline) {
-    loadingState.style.display = 'block';
-    resultsView.style.opacity = '0.4';
+    if (loadingState) loadingState.style.display = 'grid';
+    if (resultsView) resultsView.style.opacity = '0.3';
+    btnAnalyze.disabled = true;
 
     try {
       const resp = await fetch('/api/analyze', {
@@ -148,8 +235,9 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('Analysis error:', err);
       alert('Analysis request failed. Please check network connection.');
     } finally {
-      loadingState.style.display = 'none';
-      resultsView.style.opacity = '1';
+      if (loadingState) loadingState.style.display = 'none';
+      if (resultsView) resultsView.style.opacity = '1';
+      btnAnalyze.disabled = false;
     }
   }
 
@@ -162,6 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Sentiment Badge & Score
     const label = sentiment.label; // 'POS' | 'NEU' | 'NEG'
     cardBadge.className = `sentiment-badge ${label}`;
+    if (cardBadgeDot) cardBadgeDot.textContent = '●';
     cardBadgeText.textContent = label === 'POS' ? 'POSITIVE' : (label === 'NEG' ? 'NEGATIVE' : 'NEUTRAL');
     cardScoreNum.textContent = `${(sentiment.score * 100).toFixed(1)}%`;
 
@@ -178,13 +267,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Diagnostics
     diagMarket.textContent = sentiment.market_impact;
-    if (label === 'POS') diagMarket.style.color = 'var(--pos-color)';
-    else if (label === 'NEG') diagMarket.style.color = 'var(--neg-color)';
-    else diagMarket.style.color = 'var(--neu-color)';
+    if (label === 'POS') diagMarket.style.color = 'var(--pos-fg)';
+    else if (label === 'NEG') diagMarket.style.color = 'var(--neg-fg)';
+    else diagMarket.style.color = 'var(--neu-fg)';
 
     diagPolarity.textContent = (sentiment.polarity >= 0 ? '+' : '') + sentiment.polarity.toFixed(2);
     diagTone.textContent = sentiment.tone;
     diagSubj.textContent = sentiment.subjectivity.toFixed(2);
+
+    if (diagConfidenceLabel) {
+      const confLevel = sentiment.score >= 0.85 ? 'High' : (sentiment.score >= 0.65 ? 'Moderate' : 'Low');
+      diagConfidenceLabel.textContent = `${confLevel} (${sentiment.score.toFixed(2)})`;
+    }
+
+    // Diverging Polarity Bar (-1.00 to +1.00 centered at 50%)
+    if (divergingBarFill) {
+      const pol = sentiment.polarity; // -1 to +1
+      if (pol >= 0) {
+        const widthPct = Math.min(50, pol * 50);
+        divergingBarFill.style.left = '50%';
+        divergingBarFill.style.width = `${widthPct}%`;
+        divergingBarFill.style.background = 'var(--pos-bar)';
+      } else {
+        const widthPct = Math.min(50, Math.abs(pol) * 50);
+        divergingBarFill.style.left = `${50 - widthPct}%`;
+        divergingBarFill.style.width = `${widthPct}%`;
+        divergingBarFill.style.background = 'var(--neg-bar)';
+      }
+    }
 
     // Entities
     entitiesContainer.innerHTML = '';
@@ -192,15 +302,14 @@ document.addEventListener('DOMContentLoaded', () => {
       sentiment.entities.forEach(ent => {
         const pill = document.createElement('span');
         pill.className = 'entity-pill';
-        let icon = '🏷️';
-        if (ent.type === 'Organization') icon = '🏢';
-        else if (ent.type === 'Metric/Capital') icon = '💰';
-        else if (ent.type === 'Subject/Entity') icon = '📌';
-        pill.textContent = `${icon} ${ent.text}`;
+        let prefix = '';
+        if (ent.type === 'Organization') prefix = 'Org: ';
+        else if (ent.type === 'Metric/Capital') prefix = 'Val: ';
+        pill.textContent = `${prefix}${ent.text}`;
         entitiesContainer.appendChild(pill);
       });
     } else {
-      entitiesContainer.innerHTML = '<span style="font-size: 0.75rem; color: var(--text-muted);">Standard descriptive text (no specific corporate entities isolated)</span>';
+      entitiesContainer.innerHTML = '<span style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">No specific corporate entities isolated</span>';
     }
 
     // Render Trail
@@ -210,14 +319,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // Trail Switcher
   btnModeRipple.addEventListener('click', () => {
     btnModeRipple.classList.add('active');
+    btnModeRipple.setAttribute('aria-selected', 'true');
     btnModeLive.classList.remove('active');
+    btnModeLive.setAttribute('aria-selected', 'false');
     currentTrailMode = 'ripple';
     renderTrailNodes();
   });
 
   btnModeLive.addEventListener('click', () => {
     btnModeLive.classList.add('active');
+    btnModeLive.setAttribute('aria-selected', 'true');
     btnModeRipple.classList.remove('active');
+    btnModeRipple.setAttribute('aria-selected', 'false');
     currentTrailMode = 'live';
     renderTrailNodes();
   });
@@ -244,8 +357,8 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="node-title">${escapeHtml(node.headline)}</div>
           <div class="node-desc">${escapeHtml(node.description)}</div>
           <div class="node-foot">
-            <span>🏷️ ${escapeHtml(node.impactType)}</span>
-            <span>📡 ${escapeHtml(node.source)}</span>
+            <span>Stage: ${escapeHtml(node.impactType)}</span>
+            <span>Source: ${escapeHtml(node.source)}</span>
           </div>
         `;
         trailNodesWrap.appendChild(card);
@@ -255,8 +368,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const live = currentAnalysisData.liveRelatedTrail || [];
       if (live.length === 0) {
         trailNodesWrap.innerHTML = `
-          <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
-            No live Google News RSS items found for this exact entity. Switch back to "Narrative Ripple" view to see the projected narrative timeline.
+          <div style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.82rem; font-family: var(--font-mono);">
+            No recent live Google News items returned for this entity. Switch back to "Ripple Projection" to view the narrative timeline.
           </div>
         `;
         return;
@@ -276,8 +389,8 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div class="node-title">${escapeHtml(item.title)}</div>
           <div class="node-foot">
-            <span>📡 ${escapeHtml(item.source)}</span>
-            ${item.link ? `<a href="${item.link}" target="_blank" rel="noopener">Open Source ➔</a>` : ''}
+            <span>Publisher: ${escapeHtml(item.source)}</span>
+            ${item.link ? `<a href="${item.link}" target="_blank" rel="noopener">Read Source ↗</a>` : ''}
           </div>
         `;
         trailNodesWrap.appendChild(card);
@@ -287,17 +400,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateWaveform(nodes) {
     if (!nodes || nodes.length < 2) {
-      wavePath.setAttribute('d', 'M 0,35 L 600,35');
+      wavePath.setAttribute('d', 'M 0,24 L 600,24');
       return;
     }
 
-    // Map sentiments to Y values: POS = 15, NEU = 35, NEG = 55
+    // Map sentiments to Y values: POS = 10, NEU = 24, NEG = 38
     const stepX = 600 / (nodes.length - 1);
     const coords = nodes.map((n, i) => {
       const x = i * stepX;
-      let y = 35;
-      if (n.sentiment === 'POS') y = 15;
-      else if (n.sentiment === 'NEG') y = 55;
+      let y = 24;
+      if (n.sentiment === 'POS') y = 10;
+      else if (n.sentiment === 'NEG') y = 38;
       return { x, y };
     });
 
@@ -327,9 +440,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function performLiveSearch(query) {
     liveResultsWrap.innerHTML = `
-      <div style="text-align: center; padding: 30px;">
+      <div style="text-align: center; padding: 28px;">
         <div class="spinner"></div>
-        <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.85rem;">Querying Google News RSS & running BERTweet sentiment engine...</p>
+        <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.82rem; font-family: var(--font-mono);">Retrieving Google News RSS stream & running BERTweet inference...</p>
       </div>
     `;
 
@@ -338,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await resp.json();
 
       if (!data.success || !data.trail || data.trail.length === 0) {
-        liveResultsWrap.innerHTML = `<p style="color: var(--text-muted); padding: 20px;">No recent live articles returned for "${escapeHtml(query)}". Try another company or topic keyword.</p>`;
+        liveResultsWrap.innerHTML = `<p style="color: var(--text-muted); padding: 20px; font-family: var(--font-mono);">No recent live articles returned for "${escapeHtml(query)}". Try another company or sector keyword.</p>`;
         liveSummaryBar.style.display = 'none';
         return;
       }
@@ -349,6 +462,13 @@ document.addEventListener('DOMContentLoaded', () => {
       liveSumPos.textContent = `${data.summary.breakdown.POS}% (${data.summary.counts.POS})`;
       liveSumNeu.textContent = `${data.summary.breakdown.NEU}% (${data.summary.counts.NEU})`;
       liveSumNeg.textContent = `${data.summary.breakdown.NEG}% (${data.summary.counts.NEG})`;
+
+      // Update stacked proportion bar
+      if (livePropPos && livePropNeu && livePropNeg) {
+        livePropPos.style.width = `${data.summary.breakdown.POS}%`;
+        livePropNeu.style.width = `${data.summary.breakdown.NEU}%`;
+        livePropNeg.style.width = `${data.summary.breakdown.NEG}%`;
+      }
 
       // Render cards
       let html = '<div class="trail-timeline">';
@@ -362,8 +482,8 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <div class="node-title">${escapeHtml(item.title)}</div>
             <div class="node-foot">
-              <span>📡 ${escapeHtml(item.source)}</span>
-              ${item.link ? `<a href="${item.link}" target="_blank" rel="noopener">Read Article ➔</a>` : ''}
+              <span>Publisher: ${escapeHtml(item.source)}</span>
+              ${item.link ? `<a href="${item.link}" target="_blank" rel="noopener">Read Source ↗</a>` : ''}
             </div>
           </div>
         `;
@@ -373,7 +493,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     } catch (err) {
       console.error(err);
-      liveResultsWrap.innerHTML = `<p style="color: var(--neg-color); padding: 20px;">Failed to fetch live search: ${err.message}</p>`;
+      liveResultsWrap.innerHTML = `<p style="color: var(--neg-fg); padding: 20px; font-family: var(--font-mono);">Failed to fetch live stream: ${err.message}</p>`;
     }
   }
 
@@ -423,10 +543,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const scorePct = (row.score * 100).toFixed(1);
         tr.innerHTML = `
           <td style="color: var(--text-muted); font-family: var(--font-mono);">${i + 1}</td>
-          <td><strong>${escapeHtml(row.title)}</strong></td>
+          <td><strong style="font-family: var(--font-serif);">${escapeHtml(row.title)}</strong></td>
           <td><span class="node-pill ${row.sentiment}">${row.sentiment}</span></td>
-          <td style="font-family: var(--font-mono);">${scorePct}%</td>
-          <td style="font-size: 0.8rem; color: var(--text-secondary);">${row.market_impact}</td>
+          <td class="mono-nums">${scorePct}%</td>
+          <td style="font-size: 0.78rem; color: var(--text-secondary);">${row.market_impact}</td>
         `;
         batchTableBody.appendChild(tr);
       });
@@ -438,7 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('Batch classification failed: ' + err.message);
     } finally {
       btnRunBatch.disabled = false;
-      btnRunBatch.innerHTML = `<span>Process Batch (BERTweet)</span> ➔`;
+      btnRunBatch.innerHTML = `<span>Run Batch Pipeline</span> <span class="kbd-shortcut">⌘↵</span>`;
     }
   });
 
@@ -472,7 +592,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     btnRunCompare.disabled = true;
-    btnRunCompare.innerHTML = '<div class="spinner"></div> Comparing...';
+    btnRunCompare.innerHTML = '<div class="spinner"></div> Comparing Editorial Tone...';
 
     try {
       const resp = await fetch('/api/compare', {
@@ -487,27 +607,30 @@ document.addEventListener('DOMContentLoaded', () => {
       const sa = data.analysisA.sentiment;
       const sb = data.analysisB.sentiment;
 
+      const polDelta = (sa.polarity - sb.polarity).toFixed(2);
+      const confDelta = ((sa.score - sb.score) * 100).toFixed(1);
+
       compareDetailsGrid.innerHTML = `
-        <div class="battle-col" style="border-left: 3px solid ${sa.label === 'POS' ? 'var(--pos-color)' : (sa.label === 'NEG' ? 'var(--neg-color)' : 'var(--neu-color)')};">
-          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;">Variant A Outcome</div>
-          <div style="font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 8px;">"${escapeHtml(a)}"</div>
-          <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
-            <span class="sentiment-badge ${sa.label}" style="font-size: 0.85rem; padding: 4px 10px;">${sa.label}</span>
-            <span style="font-family: var(--font-mono); font-size: 0.9rem;">${(sa.score * 100).toFixed(1)}% Confidence</span>
+        <div class="battle-col" style="border-left: 3px solid ${sa.label === 'POS' ? 'var(--pos-bar)' : (sa.label === 'NEG' ? 'var(--neg-bar)' : 'var(--neu-bar)')};">
+          <div style="font-size: 0.68rem; font-family: var(--font-mono); text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;">Variant A Breakdown</div>
+          <div style="font-size: 1rem; font-family: var(--font-serif); font-weight: 600; color: var(--text-hero); margin-bottom: 8px;">"${escapeHtml(a)}"</div>
+          <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+            <span class="sentiment-badge ${sa.label}">${sa.label}</span>
+            <span class="mono-nums" style="font-size: 0.85rem; font-weight: 600;">${(sa.score * 100).toFixed(1)}% Confidence</span>
           </div>
-          <div style="font-size: 0.8rem; color: var(--text-secondary);">Market Tone: <strong>${sa.market_impact}</strong></div>
-          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">Polarity: <strong>${sa.polarity}</strong></div>
+          <div style="font-size: 0.75rem; color: var(--text-secondary);">Market Tone: <strong>${sa.market_impact}</strong></div>
+          <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Polarity: <strong class="mono-nums">${sa.polarity}</strong></div>
         </div>
 
-        <div class="battle-col" style="border-left: 3px solid ${sb.label === 'POS' ? 'var(--pos-color)' : (sb.label === 'NEG' ? 'var(--neg-color)' : 'var(--neu-color)')};">
-          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;">Variant B Outcome</div>
-          <div style="font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 8px;">"${escapeHtml(b)}"</div>
-          <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
-            <span class="sentiment-badge ${sb.label}" style="font-size: 0.85rem; padding: 4px 10px;">${sb.label}</span>
-            <span style="font-family: var(--font-mono); font-size: 0.9rem;">${(sb.score * 100).toFixed(1)}% Confidence</span>
+        <div class="battle-col" style="border-left: 3px solid ${sb.label === 'POS' ? 'var(--pos-bar)' : (sb.label === 'NEG' ? 'var(--neg-bar)' : 'var(--neu-bar)')};">
+          <div style="font-size: 0.68rem; font-family: var(--font-mono); text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;">Variant B Breakdown</div>
+          <div style="font-size: 1rem; font-family: var(--font-serif); font-weight: 600; color: var(--text-hero); margin-bottom: 8px;">"${escapeHtml(b)}"</div>
+          <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+            <span class="sentiment-badge ${sb.label}">${sb.label}</span>
+            <span class="mono-nums" style="font-size: 0.85rem; font-weight: 600;">${(sb.score * 100).toFixed(1)}% Confidence</span>
           </div>
-          <div style="font-size: 0.8rem; color: var(--text-secondary);">Market Tone: <strong>${sb.market_impact}</strong></div>
-          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">Polarity: <strong>${sb.polarity}</strong></div>
+          <div style="font-size: 0.75rem; color: var(--text-secondary);">Market Tone: <strong>${sb.market_impact}</strong></div>
+          <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Polarity: <strong class="mono-nums">${sb.polarity}</strong></div>
         </div>
       `;
 
@@ -517,7 +640,7 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('Comparison failed: ' + err.message);
     } finally {
       btnRunCompare.disabled = false;
-      btnRunCompare.innerHTML = '<span>Run Battle Comparison</span> ➔';
+      btnRunCompare.innerHTML = '<span>Run Slant Battle</span> ➔';
     }
   });
 

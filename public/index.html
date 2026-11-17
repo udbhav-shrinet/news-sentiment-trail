@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NewsPulse Trail — Minimalist News Sentiment & Ripple Tracker</title>
-  <meta name="description" content="Minimalist AI news headline sentiment classifier and narrative ripple trail tracker based on Hugging Face BERTweet architecture.">
+  <title>NewsPulse Trail — Editorial News Sentiment & Ripple Tracker</title>
+  <meta name="description" content="Editorial news headline sentiment classifier and narrative ripple trail tracker calibrated on Hugging Face BERTweet.">
   <link rel="stylesheet" href="/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <!-- Top Minimal Header -->
+  <!-- Editorial Sticky Navigation Header -->
   <header>
     <div class="container nav-wrap">
-      <a href="#" class="brand-badge">
+      <a href="#" class="brand-badge" aria-label="NewsPulse Home">
         <div class="brand-icon">NP</div>
         <div class="brand-text">
           <h1>NewsPulse <span class="model-pill">BERTweet HF</span></h1>
@@ -23,9 +23,23 @@
         </div>
       </a>
       <div class="header-links">
-        <span class="model-pill online">● Online</span>
+        <span class="model-pill online" id="status-pill">Online</span>
+        <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Light/Dark Theme" title="Toggle Theme">
+          <svg id="theme-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
         <a href="https://github.com/udbhav-shrinet/news-sentiment-trail" target="_blank" rel="noopener" class="source-link">
-          <span>GitHub</span> ↗
+          <span>GitHub</span>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
         </a>
       </div>
     </div>
@@ -33,31 +47,31 @@
 
   <main class="container">
 
-    <!-- Notion-Style Segmented Floating Tabs -->
+    <!-- Newsroom Segmented Nav Tabs -->
     <div class="nav-tabs-wrapper">
-      <nav class="nav-tabs" role="tablist">
-        <button class="tab-btn active" data-tab="single-tab">
-          <span>●</span> Headline Pulse & Trail
+      <nav class="nav-tabs" role="tablist" aria-label="Analysis Modes">
+        <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="single-tab" data-tab="single-tab">
+          Headline Pulse & Trail
         </button>
-        <button class="tab-btn" data-tab="live-tab">
-          <span>●</span> Live News Stream
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="live-tab" data-tab="live-tab">
+          Live News Stream
         </button>
-        <button class="tab-btn" data-tab="batch-tab">
-          <span>●</span> Dataset Batch Mode
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="batch-tab" data-tab="batch-tab">
+          Dataset Batch Mode
         </button>
-        <button class="tab-btn" data-tab="compare-tab">
-          <span>●</span> Editorial Slant Battle
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="compare-tab" data-tab="compare-tab">
+          Editorial Slant Battle
         </button>
       </nav>
     </div>
 
-    <!-- TAB 1: Single Headline & News Trail -->
-    <section id="single-tab" class="tab-content active">
+    <!-- TAB 1: Headline Pulse & Trail -->
+    <section id="single-tab" class="tab-content active" role="tabpanel" aria-labelledby="single-tab">
       <!-- Input Dock -->
       <div class="input-hero-card">
         <div class="input-label-row">
           <label for="headline-input">News Headline or Story Title</label>
-          <span style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">finiteautomata/bertweet-base-sentiment-analysis</span>
+          <span class="model-ref">finiteautomata/bertweet-base-sentiment-analysis</span>
         </div>
         <div class="input-box-wrap">
           <input 
@@ -66,97 +80,147 @@
             class="news-input" 
             placeholder="Type or paste any breaking news headline..."
             value="Alt Carbon scores $12M seed to scale carbon removal"
+            aria-label="News Headline"
           />
-          <button id="btn-analyze" class="btn-primary">
-            <span>Analyze & Trace</span> ➔
+          <button id="btn-analyze" class="btn-primary" aria-label="Analyze Headline">
+            <span>Analyze & Trace</span>
+            <span class="kbd-shortcut">↵</span>
           </button>
         </div>
 
-        <!-- Curated Preset Chips -->
-        <div class="presets-wrap">
+        <!-- 6 Preset Chips (Clean Line Minimalist, No Emojis) -->
+        <div class="presets-wrap" role="group" aria-label="Headline Presets">
           <span class="presets-label">Presets:</span>
-          <button class="preset-chip" data-text="Alt Carbon scores $12M seed to scale carbon removal">🌱 Alt Carbon $12M Seed</button>
-          <button class="preset-chip" data-text="Mati Carbon Wins $50 Million Prize for Boosting Yields">🏆 Mati Carbon $50M XPrize</button>
-          <button class="preset-chip" data-text="Varaha signs major offtake agreement with Microsoft">🤝 Varaha Microsoft Offtake</button>
-          <button class="preset-chip" data-text="Startup, Alt Carbon: Accelerated Weathering Challenges Ahead">⚠️ Alt Carbon Challenges</button>
-          <button class="preset-chip" data-text="Nvidia unveils next-generation Blackwell AI architecture with record speed">🚀 Nvidia AI Architecture</button>
-          <button class="preset-chip" data-text="Antitrust regulators probe cloud hyperscalers for restrictive contracts">⚖️ Cloud Antitrust Probe</button>
+          <button class="preset-chip" data-text="Alt Carbon scores $12M seed to scale carbon removal">
+            Alt Carbon $12M Seed
+          </button>
+          <button class="preset-chip" data-text="Mati Carbon Wins $50 Million Prize for Boosting Yields">
+            Mati Carbon $50M XPrize
+          </button>
+          <button class="preset-chip" data-text="Varaha signs major offtake agreement with Microsoft">
+            Varaha Microsoft Offtake
+          </button>
+          <button class="preset-chip" data-text="Startup, Alt Carbon: Accelerated Weathering Challenges Ahead">
+            Alt Carbon Challenges
+          </button>
+          <button class="preset-chip" data-text="Nvidia unveils next-generation Blackwell AI architecture with record speed">
+            Nvidia AI Architecture
+          </button>
+          <button class="preset-chip" data-text="Antitrust regulators probe cloud hyperscalers for restrictive contracts">
+            Cloud Antitrust Probe
+          </button>
         </div>
       </div>
 
-      <!-- Loading Indicator -->
-      <div id="loading-state" style="display: none; text-align: center; padding: 40px 0;">
-        <div class="spinner" style="width: 24px; height: 24px; border-width: 2px; border-top-color: #ffffff;"></div>
-        <p style="margin-top: 10px; color: var(--text-secondary); font-size: 0.85rem; font-family: var(--font-mono);">Scoring sentiment and generating narrative ripple trajectory...</p>
+      <!-- Skeleton Shimmer Loading State -->
+      <div id="loading-state" class="skeleton-wrap" style="display: none;" aria-live="polite">
+        <div class="skeleton-box">
+          <div class="skeleton-shimmer" style="height: 20px; width: 60%; margin-bottom: 16px;"></div>
+          <div class="skeleton-shimmer" style="height: 60px; width: 45%; margin-bottom: 16px;"></div>
+          <div class="skeleton-shimmer" style="height: 12px; width: 100%; margin-bottom: 8px;"></div>
+          <div class="skeleton-shimmer" style="height: 12px; width: 80%;"></div>
+        </div>
+        <div class="skeleton-box">
+          <div class="skeleton-shimmer" style="height: 14px; width: 30%; margin-bottom: 12px;"></div>
+          <div class="skeleton-shimmer" style="height: 8px; width: 100%; margin-bottom: 10px;"></div>
+          <div class="skeleton-shimmer" style="height: 8px; width: 100%; margin-bottom: 10px;"></div>
+          <div class="skeleton-shimmer" style="height: 8px; width: 100%; margin-bottom: 16px;"></div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div class="skeleton-shimmer" style="height: 40px;"></div>
+            <div class="skeleton-shimmer" style="height: 40px;"></div>
+          </div>
+        </div>
       </div>
 
-      <!-- Results Grid -->
-      <div id="results-view" class="results-grid">
+      <!-- Two-Column Desktop Result Grid -->
+      <div id="results-view" class="results-grid" aria-live="polite">
         
-        <!-- Primary Classification Card -->
-        <div class="sentiment-primary-card">
+        <!-- Left Column: Verdict & Confidence -->
+        <div class="verdict-card">
           <div>
-            <div class="headline-display" id="card-headline-text">
+            <div class="analyzed-headline-title" id="card-headline-text">
               "Alt Carbon scores $12M seed to scale carbon removal"
             </div>
 
-            <div class="badge-and-score">
-              <div class="sentiment-badge POS" id="card-badge">
-                <span id="card-badge-dot">●</span> <span id="card-badge-text">POSITIVE</span>
+            <div class="verdict-hero-block">
+              <div>
+                <span class="sentiment-badge POS" id="card-badge">
+                  <span id="card-badge-dot">●</span> <span id="card-badge-text">POSITIVE</span>
+                </span>
               </div>
-              <div class="score-display">
-                <div class="score-num" id="card-score-num">97.2%</div>
-                <div class="score-label">Confidence Score</div>
+              <div class="score-hero-num" id="card-score-num">97.2%</div>
+              <div class="score-hero-label">Confidence Score</div>
+            </div>
+
+            <!-- Diverging Polarity Bar (-1.0 to +1.0 centered at 0) -->
+            <div class="diverging-container">
+              <div class="diverging-meta">
+                <span>Polarity Spectrum</span>
+                <span id="diag-polarity" class="mono-nums">+0.96</span>
+              </div>
+              <div class="diverging-track-wrap" title="Diverging Polarity: -1.0 (Bearish/Negative) to +1.0 (Bullish/Positive)">
+                <div class="diverging-center-mark"></div>
+                <div id="diverging-bar-fill" class="diverging-bar" style="left: 50%; width: 48%; background: var(--pos-bar);"></div>
+              </div>
+              <div class="diverging-ticks">
+                <span>-1.0</span>
+                <span>0.0</span>
+                <span>+1.0</span>
+              </div>
+            </div>
+          </div>
+
+          <button id="btn-copy-result" class="copy-summary-btn" title="Copy Analysis Summary to Clipboard">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <span id="copy-btn-text">Copy Summary</span>
+          </button>
+        </div>
+
+        <!-- Right Column: Probabilities & Diagnostics -->
+        <div class="diagnostics-card">
+          <div>
+            <div class="diag-header">
+              <span>Softmax Probabilities</span>
+              <span style="font-weight: 400; color: var(--text-muted);">BERTweet Softmax</span>
+            </div>
+            
+            <div class="prob-bars-wrap">
+              <div class="prob-row">
+                <div class="prob-meta">
+                  <span style="color: var(--pos-fg);">Positive (POS)</span>
+                  <span id="prob-pos-val" class="mono-nums" style="color: var(--pos-fg);">97.2%</span>
+                </div>
+                <div class="prob-track">
+                  <div class="prob-fill pos" id="prob-pos-bar" style="width: 97.2%;"></div>
+                </div>
+              </div>
+
+              <div class="prob-row">
+                <div class="prob-meta">
+                  <span style="color: var(--neu-fg);">Neutral (NEU)</span>
+                  <span id="prob-neu-val" class="mono-nums" style="color: var(--neu-fg);">2.0%</span>
+                </div>
+                <div class="prob-track">
+                  <div class="prob-fill neu" id="prob-neu-bar" style="width: 2.0%;"></div>
+                </div>
+              </div>
+
+              <div class="prob-row">
+                <div class="prob-meta">
+                  <span style="color: var(--neg-fg);">Negative (NEG)</span>
+                  <span id="prob-neg-val" class="mono-nums" style="color: var(--neg-fg);">0.8%</span>
+                </div>
+                <div class="prob-track">
+                  <div class="prob-fill neg" id="prob-neg-bar" style="width: 0.8%;"></div>
+                </div>
               </div>
             </div>
 
-            <!-- Softmax Probability Distribution -->
-            <div style="margin-top: 16px;">
-              <div style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 8px; font-family: var(--font-mono);">
-                Softmax Probabilities
-              </div>
-              <div class="prob-bars-wrap">
-                <div class="prob-row">
-                  <div class="prob-meta">
-                    <span style="color: var(--pos-accent);">Positive (POS)</span>
-                    <span id="prob-pos-val" style="font-family: var(--font-mono); color: var(--pos-accent);">97.2%</span>
-                  </div>
-                  <div class="prob-track">
-                    <div class="prob-fill pos" id="prob-pos-bar" style="width: 97.2%;"></div>
-                  </div>
-                </div>
-
-                <div class="prob-row">
-                  <div class="prob-meta">
-                    <span style="color: var(--neu-accent);">Neutral (NEU)</span>
-                    <span id="prob-neu-val" style="font-family: var(--font-mono); color: var(--neu-accent);">2.0%</span>
-                  </div>
-                  <div class="prob-track">
-                    <div class="prob-fill neu" id="prob-neu-bar" style="width: 2.0%;"></div>
-                  </div>
-                </div>
-
-                <div class="prob-row">
-                  <div class="prob-meta">
-                    <span style="color: var(--neg-accent);">Negative (NEG)</span>
-                    <span id="prob-neg-val" style="font-family: var(--font-mono); color: var(--neg-accent);">0.8%</span>
-                  </div>
-                  <div class="prob-track">
-                    <div class="prob-fill neg" id="prob-neg-bar" style="width: 0.8%;"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Diagnostics -->
+            <!-- Diagnostics Grid -->
             <div class="diag-grid">
               <div class="diag-item">
                 <div class="diag-title">Market Momentum</div>
-                <div class="diag-val" id="diag-market" style="color: var(--pos-accent);">Strongly Bullish</div>
-              </div>
-              <div class="diag-item">
-                <div class="diag-title">Polarity Score</div>
-                <div class="diag-val" id="diag-polarity" style="font-family: var(--font-mono);">+0.96</div>
+                <div class="diag-val" id="diag-market" style="color: var(--pos-fg);">Strongly Bullish</div>
               </div>
               <div class="diag-item">
                 <div class="diag-title">Tone Profile</div>
@@ -164,69 +228,68 @@
               </div>
               <div class="diag-item">
                 <div class="diag-title">Subjectivity Index</div>
-                <div class="diag-val" id="diag-subj" style="font-family: var(--font-mono);">0.98</div>
+                <div class="diag-val" id="diag-subj" class="mono-nums">0.98</div>
+              </div>
+              <div class="diag-item">
+                <div class="diag-title">Confidence Level</div>
+                <div class="diag-val mono-nums" id="diag-confidence-label">High (0.97)</div>
               </div>
             </div>
           </div>
 
-          <!-- Detected Entities -->
-          <div style="margin-top: 18px;">
-            <div style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 6px; font-family: var(--font-mono);">
-              Extracted Entities
-            </div>
+          <!-- Extracted Entities -->
+          <div class="entities-section">
+            <div class="diag-title" style="margin-bottom: 4px;">Extracted Entities & Capital</div>
             <div class="entities-wrap" id="entities-container">
-              <span class="entity-pill">🏢 Alt Carbon</span>
-              <span class="entity-pill">💰 $12M Seed</span>
-              <span class="entity-pill">🌿 Carbon Removal</span>
+              <span class="entity-pill">Alt Carbon</span>
+              <span class="entity-pill">$12M Seed</span>
+              <span class="entity-pill">Carbon Removal</span>
             </div>
           </div>
-        </div>
-
-        <!-- Right Card: News Trail & Timeline -->
-        <div class="trail-container-card">
-          <div class="trail-header">
-            <h2>Narrative Ripple & Sentiment Trail</h2>
-            <div class="trail-mode-switch">
-              <button class="mode-btn active" id="btn-mode-ripple">Ripple Projection</button>
-              <button class="mode-btn" id="btn-mode-live">Live Related Articles</button>
-            </div>
-          </div>
-
-          <!-- Interactive Waveform SVG Curve -->
-          <div class="waveform-box">
-            <div class="waveform-meta">
-              <span>Sentiment Trajectory</span>
-              <span id="wave-legend" style="color: var(--text-secondary);">Dynamic Waveform</span>
-            </div>
-            <svg class="waveform-svg" viewBox="0 0 600 50" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stop-color="#34d399" />
-                  <stop offset="50%" stop-color="#ffffff" />
-                  <stop offset="100%" stop-color="#f87171" />
-                </linearGradient>
-              </defs>
-              <line x1="0" y1="25" x2="600" y2="25" stroke="rgba(255,255,255,0.06)" stroke-dasharray="3" />
-              <path id="wave-path" d="M 0,12 Q 150,8 300,25 T 600,16" fill="none" stroke="url(#waveGrad)" stroke-width="2" stroke-linecap="round" />
-            </svg>
-          </div>
-
-          <!-- Trail Timeline Nodes -->
-          <div class="trail-timeline" id="trail-nodes-wrap">
-            <!-- Populated by app.js -->
-          </div>
-
         </div>
 
       </div>
+
+      <!-- Full-Width Below: Narrative Ripple Timeline & Waveform -->
+      <div class="trail-container-card">
+        <div class="trail-header">
+          <h2>Narrative Ripple & Sentiment Trail</h2>
+          <div class="trail-mode-switch" role="tablist">
+            <button class="mode-btn active" id="btn-mode-ripple" role="tab" aria-selected="true">Ripple Projection</button>
+            <button class="mode-btn" id="btn-mode-live" role="tab" aria-selected="false">Live Related Articles</button>
+          </div>
+        </div>
+
+        <!-- Waveform Visualization -->
+        <div class="waveform-box">
+          <div class="waveform-meta">
+            <span>Sentiment Trajectory Waveform</span>
+            <span id="wave-legend">Trajectory Curve</span>
+          </div>
+          <svg class="waveform-svg" viewBox="0 0 600 48" preserveAspectRatio="none" aria-label="Sentiment Waveform">
+            <defs>
+              <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="var(--pos-bar)" />
+                <stop offset="50%" stop-color="var(--neu-bar)" />
+                <stop offset="100%" stop-color="var(--pos-bar)" />
+              </linearGradient>
+            </defs>
+            <line x1="0" y1="24" x2="600" y2="24" stroke="var(--border-subtle)" stroke-dasharray="3" />
+            <path id="wave-path" d="M 0,12 Q 150,8 300,24 T 600,14" fill="none" stroke="url(#waveGrad)" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </div>
+
+        <!-- Trail Timeline Nodes -->
+        <div class="trail-timeline" id="trail-nodes-wrap" aria-live="polite"></div>
+      </div>
     </section>
 
-    <!-- TAB 2: Live Authentic News Stream -->
-    <section id="live-tab" class="tab-content" style="display: none;">
+    <!-- TAB 2: Live News Stream -->
+    <section id="live-tab" class="tab-content" style="display: none;" role="tabpanel" aria-labelledby="live-tab">
       <div class="input-hero-card">
         <div class="input-label-row">
-          <label>Live Stream via Google News RSS</label>
-          <span style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">Real-time headline retrieval & BERTweet scoring</span>
+          <label for="live-query-input">Live Stream Query via Google News RSS</label>
+          <span class="model-ref">Real-time retrieval & BERTweet scoring</span>
         </div>
         <div class="input-box-wrap">
           <input 
@@ -235,63 +298,73 @@
             class="news-input" 
             placeholder="Search company or sector (e.g. Mati Carbon, Anthropic, Solar Energy)..."
             value="Mati Carbon"
+            aria-label="Search Company or Sector"
           />
           <button id="btn-search-live" class="btn-primary">
-            <span>Fetch Stream</span> ➔
+            <span>Fetch Stream</span>
+            <span class="kbd-shortcut">↵</span>
           </button>
         </div>
       </div>
 
-      <!-- Live Summary Bar -->
+      <!-- Stat Tiles with Stacked Proportion Bar -->
       <div id="live-summary-bar" style="display: none; margin-bottom: 20px;">
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
-          <div class="diag-item">
-            <div class="diag-title">Total Headlines</div>
-            <div class="diag-val" id="live-sum-total">0</div>
+        <div class="live-stream-grid">
+          <div class="stat-tile">
+            <div class="stat-tile-label">Total Headlines</div>
+            <div class="stat-tile-val mono-nums" id="live-sum-total">0</div>
           </div>
-          <div class="diag-item">
-            <div class="diag-title">Positive Ratio</div>
-            <div class="diag-val" id="live-sum-pos" style="color: var(--pos-accent);">0%</div>
+          <div class="stat-tile">
+            <div class="stat-tile-label">Positive Ratio</div>
+            <div class="stat-tile-val mono-nums" id="live-sum-pos" style="color: var(--pos-fg);">0%</div>
           </div>
-          <div class="diag-item">
-            <div class="diag-title">Neutral Ratio</div>
-            <div class="diag-val" id="live-sum-neu" style="color: var(--neu-accent);">0%</div>
+          <div class="stat-tile">
+            <div class="stat-tile-label">Neutral Ratio</div>
+            <div class="stat-tile-val mono-nums" id="live-sum-neu" style="color: var(--neu-fg);">0%</div>
           </div>
-          <div class="diag-item">
-            <div class="diag-title">Negative Ratio</div>
-            <div class="diag-val" id="live-sum-neg" style="color: var(--neg-accent);">0%</div>
+          <div class="stat-tile">
+            <div class="stat-tile-label">Negative Ratio</div>
+            <div class="stat-tile-val mono-nums" id="live-sum-neg" style="color: var(--neg-fg);">0%</div>
           </div>
+        </div>
+
+        <!-- Stacked Proportion Bar -->
+        <div class="stacked-proportion-bar" title="Sentiment Distribution (Pos/Neu/Neg)" aria-hidden="true">
+          <span id="live-prop-pos" class="prop-pos" style="width: 0%;"></span>
+          <span id="live-prop-neu" class="prop-neu" style="width: 0%;"></span>
+          <span id="live-prop-neg" class="prop-neg" style="width: 0%;"></span>
         </div>
       </div>
 
-      <div id="live-results-wrap" class="batch-card">
+      <div id="live-results-wrap" class="batch-card" aria-live="polite">
         <p style="color: var(--text-muted); font-size: 0.85rem; font-family: var(--font-mono);">Enter a query above to fetch live news articles and map their sentiment stream.</p>
       </div>
     </section>
 
-    <!-- TAB 3: Batch Dataset Mode -->
-    <section id="batch-tab" class="tab-content" style="display: none;">
+    <!-- TAB 3: Dataset Batch Mode -->
+    <section id="batch-tab" class="tab-content" style="display: none;" role="tabpanel" aria-labelledby="batch-tab">
       <div class="batch-section">
         <div class="batch-card">
           <div class="input-label-row">
-            <label>Batch Spreadsheet & Headline Processor</label>
-            <span style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">Matches Colab Notebook output structure</span>
+            <label for="batch-textarea">Batch Spreadsheet & Headline Processor</label>
+            <span class="model-ref">Matches Colab Notebook output structure</span>
           </div>
           <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">
             Paste headlines (one per line) or load test samples from <code>Final_sentiment_classification(hf).ipynb</code>.
           </p>
 
-          <textarea id="batch-textarea" class="textarea-batch" placeholder="Paste news titles here, one per line..."></textarea>
+          <textarea id="batch-textarea" class="textarea-batch" placeholder="Paste news titles here, one per line..." aria-label="Batch Headlines"></textarea>
 
           <div class="batch-actions">
             <button id="btn-run-batch" class="btn-primary">
-              <span>Run Batch Pipeline</span> ➔
+              <span>Run Batch Pipeline</span>
+              <span class="kbd-shortcut">⌘↵</span>
             </button>
             <button id="btn-load-colab-sample" class="btn-secondary">
-              <span>📥 Load 15 Samples</span>
+              <span>Load 15 Samples</span>
             </button>
             <button id="btn-export-csv" class="btn-secondary" style="display: none;">
-              <span>💾 Export Enriched CSV</span>
+              <span>Export Enriched CSV</span>
             </button>
             <button id="btn-clear-batch" class="btn-secondary">
               <span>Clear</span>
@@ -300,24 +373,24 @@
         </div>
 
         <!-- Batch Results Wrap -->
-        <div id="batch-results-wrap" class="batch-card" style="display: none;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-            <h3 style="font-size: 0.95rem; color: var(--text-pure); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Batch Classification Summary</h3>
+        <div id="batch-results-wrap" class="batch-card" style="display: none;" aria-live="polite">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+            <h3 style="font-size: 0.88rem; font-family: var(--font-mono); text-transform: uppercase; color: var(--text-hero); font-weight: 600;">Batch Classification Summary</h3>
             <span id="batch-count-badge" class="model-pill">0 processed</span>
           </div>
 
           <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px;">
-            <div class="diag-item" style="border-left: 2px solid var(--pos-accent);">
+            <div class="diag-item" style="border-left: 2px solid var(--pos-bar);">
               <div class="diag-title">Positive (POS)</div>
-              <div class="diag-val" id="batch-stat-pos" style="color: var(--pos-accent);">0</div>
+              <div class="diag-val mono-nums" id="batch-stat-pos" style="color: var(--pos-fg);">0</div>
             </div>
-            <div class="diag-item" style="border-left: 2px solid var(--neu-accent);">
+            <div class="diag-item" style="border-left: 2px solid var(--neu-bar);">
               <div class="diag-title">Neutral (NEU)</div>
-              <div class="diag-val" id="batch-stat-neu" style="color: var(--neu-accent);">0</div>
+              <div class="diag-val mono-nums" id="batch-stat-neu" style="color: var(--neu-fg);">0</div>
             </div>
-            <div class="diag-item" style="border-left: 2px solid var(--neg-accent);">
+            <div class="diag-item" style="border-left: 2px solid var(--neg-bar);">
               <div class="diag-title">Negative (NEG)</div>
-              <div class="diag-val" id="batch-stat-neg" style="color: var(--neg-accent);">0</div>
+              <div class="diag-val mono-nums" id="batch-stat-neg" style="color: var(--neg-fg);">0</div>
             </div>
           </div>
 
@@ -340,11 +413,11 @@
     </section>
 
     <!-- TAB 4: Editorial Slant Battle -->
-    <section id="compare-tab" class="tab-content" style="display: none;">
+    <section id="compare-tab" class="tab-content" style="display: none;" role="tabpanel" aria-labelledby="compare-tab">
       <div class="input-hero-card">
         <div class="input-label-row">
           <label>Compare Editorial Framing & Slant</label>
-          <span style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">A/B Headline Delta Analysis</span>
+          <span class="model-ref">A/B Headline Delta Analysis</span>
         </div>
         <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 14px;">
           Measure how vocabulary choices alter sentiment and market reception on the same underlying news.
@@ -352,37 +425,37 @@
 
         <div class="battle-grid">
           <div class="battle-col">
-            <label style="font-size: 0.72rem; font-family: var(--font-mono); color: var(--text-secondary); text-transform: uppercase;">Headline Variant A</label>
+            <label for="compare-input-a" style="font-size: 0.72rem; font-family: var(--font-mono); color: var(--text-secondary); text-transform: uppercase;">Headline Variant A</label>
             <input 
               type="text" 
               id="compare-input-a" 
               class="news-input" 
-              style="margin-top: 6px; width: 100%;" 
+              style="margin-top: 6px; width: 100%; font-family: var(--font-serif);" 
               value="Alt Carbon scores $12M seed to scale carbon removal"
             />
           </div>
           <div class="battle-col">
-            <label style="font-size: 0.72rem; font-family: var(--font-mono); color: var(--text-secondary); text-transform: uppercase;">Headline Variant B</label>
+            <label for="compare-input-b" style="font-size: 0.72rem; font-family: var(--font-mono); color: var(--text-secondary); text-transform: uppercase;">Headline Variant B</label>
             <input 
               type="text" 
               id="compare-input-b" 
               class="news-input" 
-              style="margin-top: 6px; width: 100%;" 
+              style="margin-top: 6px; width: 100%; font-family: var(--font-serif);" 
               value="Startup, Alt Carbon: Accelerated Weathering Challenges Ahead"
             />
           </div>
         </div>
 
-        <button id="btn-run-compare" class="btn-primary" style="margin-top: 8px;">
+        <button id="btn-run-compare" class="btn-primary" style="margin-top: 4px;">
           <span>Run Slant Battle</span> ➔
         </button>
       </div>
 
       <!-- Compare Results View -->
-      <div id="compare-results-view" class="batch-card" style="display: none;">
-        <div id="compare-verdict-box" style="padding: 14px; border-radius: var(--radius-xs); background: var(--bg-surface); border: 1px solid var(--border-medium); margin-bottom: 16px;">
-          <div style="font-size: 0.68rem; text-transform: uppercase; color: var(--text-muted); font-family: var(--font-mono); font-weight: 700;">Slant Differential Verdict</div>
-          <div id="compare-verdict-text" style="font-size: 0.88rem; color: var(--text-pure); margin-top: 4px;"></div>
+      <div id="compare-results-view" class="batch-card" style="display: none;" aria-live="polite">
+        <div id="compare-verdict-box" class="slant-delta-box">
+          <div class="slant-delta-title">Slant Differential Verdict</div>
+          <div id="compare-verdict-text" class="slant-delta-text"></div>
         </div>
 
         <div class="battle-grid" id="compare-details-grid"></div>
