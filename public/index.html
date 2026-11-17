@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NewsPulse Trail — Sentiment & Narrative Ripple Tracker</title>
+  <meta name="description" content="AI news headline sentiment classifier and narrative ripple trail tracker based on Hugging Face BERTweet architecture.">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header>
+    <div class="container nav-wrap">
+      <a href="#" class="brand-badge">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-text">
+          <h1>NewsPulse Trail <span class="model-pill">BERTweet HF</span></h1>
+          <p>Real-Time News Sentiment & Narrative Ripple Architecture</p>
+        </div>
+      </a>
+      <div class="header-links">
+        <span class="model-pill" style="color: var(--pos-color); border-color: var(--pos-border);">● Live Engine Online</span>
+        <a href="#notebook-info" class="source-link" id="btn-colab-info">📓 From Colab Notebook</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Feature Navigation Tabs -->
+    <nav class="nav-tabs" role="tablist">
+      <button class="tab-btn active" data-tab="single-tab">
+        <span>⚡</span> Headline Sentiment & Ripple Trail
+      </button>
+      <button class="tab-btn" data-tab="live-tab">
+        <span>🌐</span> Live Authentic News Search
+      </button>
+      <button class="tab-btn" data-tab="batch-tab">
+        <span>📊</span> Batch & Excel Dataset Processor
+      </button>
+      <button class="tab-btn" data-tab="compare-tab">
+        <span>⚖️</span> Headline Slant Battle
+      </button>
+    </nav>
+
+    <!-- TAB 1: Single Headline & News Trail -->
+    <section id="single-tab" class="tab-content active">
+      <!-- Input Card -->
+      <div class="input-hero-card">
+        <div class="input-label-row">
+          <label for="headline-input">Enter Breaking News Headline or Story Title</label>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Trained on <code>finiteautomata/bertweet-base-sentiment-analysis</code></span>
+        </div>
+        <div class="input-box-wrap">
+          <input 
+            type="text" 
+            id="headline-input" 
+            class="news-input" 
+            placeholder="e.g. Alt Carbon scores $12M seed to scale carbon removal"
+            value="Alt Carbon scores $12M seed to scale carbon removal"
+          />
+          <button id="btn-analyze" class="btn-primary">
+            <span>Analyze & Trace Trail</span> ➔
+          </button>
+        </div>
+
+        <!-- Presets -->
+        <div class="presets-wrap">
+          <span class="presets-label">Quick Presets:</span>
+          <button class="preset-chip" data-text="Alt Carbon scores $12M seed to scale carbon removal">🌱 Alt Carbon $12M Seed (Colab)</button>
+          <button class="preset-chip" data-text="Mati Carbon Wins $50 Million Prize for Boosting Yields">🏆 Mati Carbon $50M XPrize (Colab)</button>
+          <button class="preset-chip" data-text="Varaha signs major offtake agreement with Microsoft">🤝 Varaha Microsoft Offtake (Colab)</button>
+          <button class="preset-chip" data-text="Startup, Alt Carbon: Accelerated Weathering Challenges Ahead">⚠️ Alt Carbon Challenges (Colab)</button>
+          <button class="preset-chip" data-text="Nvidia reveals Next-Gen AI Silicon with Record 40% Efficiency Gains">🚀 Nvidia AI Silicon Surge</button>
+          <button class="preset-chip" data-text="Federal Regulators Probe Big Tech for Monopolistic Cloud Pricing">⚖️ Cloud Antitrust Probe</button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div id="loading-state" style="display: none; text-align: center; padding: 40px 0;">
+        <div class="spinner" style="width: 32px; height: 32px; border-width: 3px; border-top-color: var(--accent-purple);"></div>
+        <p style="margin-top: 12px; color: var(--text-secondary); font-size: 0.9rem;">Classifying sentiment and tracing narrative ripple trail...</p>
+      </div>
+
+      <!-- Main Results Container -->
+      <div id="results-view" class="results-grid">
+        
+        <!-- Left Column: Sentiment Diagnostics Card -->
+        <div class="sentiment-primary-card">
+          <div>
+            <div class="headline-display" id="card-headline-text">
+              "Alt Carbon scores $12M seed to scale carbon removal"
+            </div>
+
+            <div class="badge-and-score">
+              <div class="sentiment-badge POS" id="card-badge">
+                <span id="card-badge-dot">●</span> <span id="card-badge-text">POSITIVE</span>
+              </div>
+              <div class="score-display">
+                <div class="score-num" id="card-score-num">97.2%</div>
+                <div class="score-label">Confidence Score</div>
+              </div>
+            </div>
+
+            <!-- Softmax Probability Distribution -->
+            <div style="margin-top: 20px;">
+              <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">
+                Softmax Probability Spectrum
+              </div>
+              <div class="prob-bars-wrap">
+                <div class="prob-row">
+                  <div class="prob-meta">
+                    <span style="color: var(--pos-color);">Positive (POS)</span>
+                    <span id="prob-pos-val" style="font-family: var(--font-mono);">97.2%</span>
+                  </div>
+                  <div class="prob-track">
+                    <div class="prob-fill pos" id="prob-pos-bar" style="width: 97.2%;"></div>
+                  </div>
+                </div>
+
+                <div class="prob-row">
+                  <div class="prob-meta">
+                    <span style="color: var(--neu-color);">Neutral (NEU)</span>
+                    <span id="prob-neu-val" style="font-family: var(--font-mono);">2.0%</span>
+                  </div>
+                  <div class="prob-track">
+                    <div class="prob-fill neu" id="prob-neu-bar" style="width: 2.0%;"></div>
+                  </div>
+                </div>
+
+                <div class="prob-row">
+                  <div class="prob-meta">
+                    <span style="color: var(--neg-color);">Negative (NEG)</span>
+                    <span id="prob-neg-val" style="font-family: var(--font-mono);">0.8%</span>
+                  </div>
+                  <div class="prob-track">
+                    <div class="prob-fill neg" id="prob-neg-bar" style="width: 0.8%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tone Diagnostics -->
+            <div class="diag-grid">
+              <div class="diag-item">
+                <div class="diag-title">Market Momentum</div>
+                <div class="diag-val" id="diag-market" style="color: var(--pos-color);">Strongly Bullish</div>
+              </div>
+              <div class="diag-item">
+                <div class="diag-title">Polarity Score</div>
+                <div class="diag-val" id="diag-polarity" style="font-family: var(--font-mono);">+0.96</div>
+              </div>
+              <div class="diag-item">
+                <div class="diag-title">Tone Profile</div>
+                <div class="diag-val" id="diag-tone">High Growth Optimism</div>
+              </div>
+              <div class="diag-item">
+                <div class="diag-title">Subjectivity Index</div>
+                <div class="diag-val" id="diag-subj" style="font-family: var(--font-mono);">0.98</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detected Entities -->
+          <div style="margin-top: 24px;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">
+              Detected Entities & Attributes
+            </div>
+            <div class="entities-wrap" id="entities-container">
+              <span class="entity-pill">🏢 Alt Carbon</span>
+              <span class="entity-pill">💰 $12M Seed</span>
+              <span class="entity-pill">🌿 Carbon Removal</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: The News Trail & Ripple Chronicle -->
+        <div class="trail-container-card">
+          <div class="trail-header">
+            <h2>
+              <span>🌊</span> Sentiment Trail & Ripple Timeline
+            </h2>
+            <div class="trail-mode-switch">
+              <button class="mode-btn active" id="btn-mode-ripple">Narrative Ripple</button>
+              <button class="mode-btn" id="btn-mode-live">Live Related News</button>
+            </div>
+          </div>
+
+          <!-- Interactive Waveform SVG Curve -->
+          <div class="waveform-box">
+            <div class="waveform-meta">
+              <span>Sentiment Trajectory Wave</span>
+              <span id="wave-legend" style="color: var(--accent-purple);">Dynamic Trend Curve</span>
+            </div>
+            <svg class="waveform-svg" viewBox="0 0 600 70" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#34d399" />
+                  <stop offset="50%" stop-color="#c084fc" />
+                  <stop offset="100%" stop-color="#60a5fa" />
+                </linearGradient>
+              </defs>
+              <line x1="0" y1="35" x2="600" y2="35" stroke="rgba(255,255,255,0.08)" stroke-dasharray="4" />
+              <path id="wave-path" d="M 0,15 Q 150,10 300,35 T 600,20" fill="none" stroke="url(#waveGrad)" stroke-width="3" stroke-linecap="round" />
+            </svg>
+          </div>
+
+          <!-- Trail Nodes Container -->
+          <div class="trail-timeline" id="trail-nodes-wrap">
+            <!-- Dynamically populated by app.js -->
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TAB 2: Live Authentic News Search -->
+    <section id="live-tab" class="tab-content" style="display: none;">
+      <div class="input-hero-card">
+        <div class="input-label-row">
+          <label>Query Authentic Live Headlines via Google News RSS</label>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Pulls live news & classifies sentiment in real-time</span>
+        </div>
+        <div class="input-box-wrap">
+          <input 
+            type="text" 
+            id="live-query-input" 
+            class="news-input" 
+            placeholder="e.g. Mati Carbon or Microsoft Climate or OpenAI"
+            value="Mati Carbon"
+          />
+          <button id="btn-search-live" class="btn-primary">
+            <span>Query Live News</span> ➔
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Search Summary Cards -->
+      <div id="live-summary-bar" style="display: none; margin-bottom: 20px;">
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
+          <div class="diag-item">
+            <div class="diag-title">Total Headlines</div>
+            <div class="diag-val" id="live-sum-total">0</div>
+          </div>
+          <div class="diag-item">
+            <div class="diag-title">Positive Ratio</div>
+            <div class="diag-val" id="live-sum-pos" style="color: var(--pos-color);">0%</div>
+          </div>
+          <div class="diag-item">
+            <div class="diag-title">Neutral Ratio</div>
+            <div class="diag-val" id="live-sum-neu" style="color: var(--neu-color);">0%</div>
+          </div>
+          <div class="diag-item">
+            <div class="diag-title">Negative Ratio</div>
+            <div class="diag-val" id="live-sum-neg" style="color: var(--neg-color);">0%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live News Feed Container -->
+      <div id="live-results-wrap" class="batch-card">
+        <p style="color: var(--text-muted); font-size: 0.88rem;">Enter a query above to fetch live news headlines and see their sentiment trail.</p>
+      </div>
+    </section>
+
+    <!-- TAB 3: Batch Dataset Processor (Colab Tribute) -->
+    <section id="batch-tab" class="tab-content" style="display: none;">
+      <div class="batch-section">
+        <div class="batch-card">
+          <div class="input-label-row">
+            <label>Batch Headline Sentiment Classifier</label>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Replicates the 1,996-row Colab Notebook pipeline</span>
+          </div>
+          <p style="font-size: 0.82rem; color: var(--text-muted);">
+            Paste multiple headlines (one per line) or load the pre-extracted test dataset from <code>Final_sentiment_classification(hf).ipynb</code>.
+          </p>
+
+          <textarea id="batch-textarea" class="textarea-batch" placeholder="Paste headlines here, one per line..."></textarea>
+
+          <div class="batch-actions">
+            <button id="btn-run-batch" class="btn-primary">
+              <span>Process Batch (BERTweet)</span> ➔
+            </button>
+            <button id="btn-load-colab-sample" class="btn-secondary">
+              <span>📥 Load 15 Samples from Notebook</span>
+            </button>
+            <button id="btn-export-csv" class="btn-secondary" style="display: none;">
+              <span>💾 Export Enriched CSV</span>
+            </button>
+            <button id="btn-clear-batch" class="btn-secondary">
+              <span>Clear</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Batch Results Table -->
+        <div id="batch-results-wrap" class="batch-card" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="font-size: 1rem; color: #fff;">Batch Classification Results</h3>
+            <span id="batch-count-badge" class="model-pill">0 processed</span>
+          </div>
+
+          <!-- Summary Metric Cards -->
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
+            <div class="diag-item" style="border-left: 3px solid var(--pos-color);">
+              <div class="diag-title">Positive Count (POS)</div>
+              <div class="diag-val" id="batch-stat-pos">0</div>
+            </div>
+            <div class="diag-item" style="border-left: 3px solid var(--neu-color);">
+              <div class="diag-title">Neutral Count (NEU)</div>
+              <div class="diag-val" id="batch-stat-neu">0</div>
+            </div>
+            <div class="diag-item" style="border-left: 3px solid var(--neg-color);">
+              <div class="diag-title">Negative Count (NEG)</div>
+              <div class="diag-val" id="batch-stat-neg">0</div>
+            </div>
+          </div>
+
+          <div class="data-table-wrap">
+            <table class="data-table" id="batch-table">
+              <thead>
+                <tr>
+                  <th style="width: 50px;">#</th>
+                  <th>Title / Headline</th>
+                  <th style="width: 90px;">Sentiment</th>
+                  <th style="width: 100px;">Score</th>
+                  <th style="width: 150px;">Market Signal</th>
+                </tr>
+              </thead>
+              <tbody id="batch-table-body">
+                <!-- Rows injected by app.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: Headline Slant Battle -->
+    <section id="compare-tab" class="tab-content" style="display: none;">
+      <div class="input-hero-card">
+        <div class="input-label-row">
+          <label>Compare Editorial Slant & Sentiment Variance</label>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">A/B Headline Sentiment Testing</span>
+        </div>
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 16px;">
+          Examine how different publishers frame the exact same news event.
+        </p>
+
+        <div class="battle-grid">
+          <div class="battle-col">
+            <label style="font-size: 0.8rem; color: var(--accent-purple); font-weight: 600;">Headline Variant A</label>
+            <input 
+              type="text" 
+              id="compare-input-a" 
+              class="news-input" 
+              style="margin-top: 8px; width: 100%;" 
+              value="Alt Carbon scores $12M seed to scale carbon removal"
+            />
+          </div>
+          <div class="battle-col">
+            <label style="font-size: 0.8rem; color: var(--accent-purple); font-weight: 600;">Headline Variant B</label>
+            <input 
+              type="text" 
+              id="compare-input-b" 
+              class="news-input" 
+              style="margin-top: 8px; width: 100%;" 
+              value="Startup, Alt Carbon: Accelerated Weathering Challenges and Obstacles"
+            />
+          </div>
+        </div>
+
+        <button id="btn-run-compare" class="btn-primary" style="margin-top: 10px;">
+          <span>Run Battle Comparison</span> ➔
+        </button>
+      </div>
+
+      <!-- Compare Results View -->
+      <div id="compare-results-view" class="batch-card" style="display: none;">
+        <div id="compare-verdict-box" style="padding: 16px; border-radius: 10px; background: rgba(192, 132, 252, 0.08); border: 1px solid var(--accent-purple); margin-bottom: 20px;">
+          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--accent-purple); font-weight: 700;">Comparative Slant Verdict</div>
+          <div id="compare-verdict-text" style="font-size: 0.95rem; color: #fff; margin-top: 4px;"></div>
+        </div>
+
+        <div class="battle-grid" id="compare-details-grid">
+          <!-- Populated by app.js -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>NewsPulse Trail • Built for Vercel • Based on Hugging Face <code>finiteautomata/bertweet-base-sentiment-analysis</code></p>
+    </div>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
