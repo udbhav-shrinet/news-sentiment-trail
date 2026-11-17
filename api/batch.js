@@ -44,6 +44,8 @@ module.exports = async (req, res) => {
         probabilities: s.probabilities,
         market_impact: s.market_impact,
         polarity: s.polarity,
+        subjectivity: s.subjectivity,
+        tone: s.tone,
         entities: s.entities
       };
     });
